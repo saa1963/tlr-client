@@ -1,0 +1,20 @@
+#MainTable {
+    background-color: rgb(240,240,240);
+    border-collapse: separate;
+}
+
+.date {
+    background-color: bisque;
+}    
+
+td {
+    padding: 2px;
+    white-space: nowrap;
+    width: 120px;
+    text-align: center;
+}
+
+td:hover {
+    font-weight: bold;
+    cursor: pointer;
+}

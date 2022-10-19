@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { useContext } from 'react';
-import { AuthContext } from '../AuthContext';
+import { AuthContext } from '../Contexts';
 import LoginShow from '../LoginShow/LoginShow';
 import NavButton from '../NavButton/NavButton';
 
@@ -31,19 +31,6 @@ const MyComponents = {
 function AppHeader(props: any) {
     const [authContext]: any = useContext(AuthContext);
 
-    const pageBack = (e: any) => {
-        alert('1');
-    }
-    const itemBack = (e: any) => {
-        alert('2');
-    }
-    const itemForward = (e: any) => {
-        alert('3');
-    }
-    const pageForward = (e: any) => {
-        alert('4');
-    }
-
     return (
         <div>
             <nav className="navbar navbar-expand-lg bg-light">
@@ -55,16 +42,16 @@ function AppHeader(props: any) {
                         <ul className="navbar-nav align-items-center">
                             <ul className="navbar-nav">
                                 <li className="nav-item me-1">
-                                    <NavButton onClick={pageBack}>&lt;&lt;</NavButton>
+                                    <NavButton onClick={props.onPrevPage}>&lt;&lt;</NavButton>
                                 </li>
                                 <li className="nav-item me-1">
-                                    <NavButton onClick={itemBack}>&lt;</NavButton>
+                                    <NavButton onClick={props.onPrevPeriod}>&lt;</NavButton>
                                 </li>
                                 <li className="nav-item me-1">
-                                    <NavButton onClick={itemForward}>&gt;</NavButton>
+                                    <NavButton onClick={props.onNextPeriod}>&gt;</NavButton>
                                 </li>
                                 <li className="nav-item">
-                                    <NavButton onClick={pageForward}>&gt;&gt;</NavButton>
+                                    <NavButton onClick={props.onNextPage}>&gt;&gt;</NavButton>
                                 </li>
                             </ul>
                             <li className="nav-item dropdown">

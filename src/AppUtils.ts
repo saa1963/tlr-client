@@ -58,6 +58,31 @@ export const AppUtils = (function () {
                 }
             }
             return rt;
+        },
+        GetDrawDates: (period: EnumPeriod, mainLine: NSEventPeriod.Event[]): [string[], number[]] => {
+            const dates: string[] = [];
+            const datesNum: number[] = [];
+            for (let i = 0; i < mainLine.length; ++i) {
+                datesNum.push(mainLine[i].ValueEvent);
+                switch (period) {
+                    case EnumPeriod.day:
+                        dates.push(DateUtils.formatDay(mainLine[i].ValueEvent));
+                        break;
+                    case EnumPeriod.month:
+                        dates.push(DateUtils.formatMonth(mainLine[i].ValueEvent));
+                        break;
+                    case EnumPeriod.year:
+                        dates.push(DateUtils.formatYear(mainLine[i].ValueEvent));
+                        break;
+                    case EnumPeriod.decade:
+                        dates.push(DateUtils.formatDecade(mainLine[i].ValueEvent));
+                        break;
+                    case EnumPeriod.century:
+                        dates.push(DateUtils.formatCentury(mainLine[i].ValueEvent));
+                        break;
+                }
+            }
+            return [dates, datesNum];
         }
     }
 })();
