@@ -18,7 +18,7 @@ export class ApiClient {
     return 'Ошибка HTTP - ' + response.status;
   }
 
-  public async DoLogin(login: string, password: string): Promise<{jwtToken: string, user: string}> {
+  public async DoLogin(login: string, password: string): Promise<{ jwtToken: string, user: string }> {
     if ((login || '').trim() !== '' && (password || '').trim() !== '') {
       const passwordMd5 = stringUtils.md5(password);
       const response = await fetch('auth/logon', {
@@ -31,12 +31,12 @@ export class ApiClient {
       if (response.headers.has('tl-server')) {
         if (response.ok) {
           const authInfo = await response.json();
-          return {jwtToken: authInfo.access_token, user: login};
+          return { jwtToken: authInfo.access_token, user: login };
         } else {
           throw new Error(response.statusText);
         }
       } else {
-        return {jwtToken: '11111111111111111111111111111111', user: login};
+        return { jwtToken: '11111111111111111111111111111111', user: login };
       }
     } else {
       throw new Error('Не введены логин или пароль.');
@@ -96,10 +96,14 @@ export class ApiClient {
         Authorization: 'Bearer ' + localStorage.getItem('tokenTL'),
       },
     });
-    if (response.ok) {
-      return await response.json();
+    if (response.headers.has('tl-server')) {
+      if (response.ok) {
+        return await response.json();
+      } else {
+        throw new Error('Статус - ' + response.status + ' ' + response.statusText);
+      }
     } else {
-      throw new Error('Статус - ' + response.status + ' ' + response.statusText);
+      return ['Один', 'Два', 'Три'];
     }
   }
 

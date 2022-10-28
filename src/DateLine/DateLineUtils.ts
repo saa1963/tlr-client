@@ -1,10 +1,12 @@
-import DateUtils from "./lib/dateutils";
-import { EnumPeriod } from "./lib/EnumPeriod";
-import * as NSEventPeriod from './lib/EventPeriod';
+import DateUtils from "../lib/dateutils";
+import { EnumPeriod } from "../lib/EnumPeriod";
+import * as NSEventPeriod from '../lib/EventPeriod';
 
-export const AppUtils = (function () {
-    const getClientWidth = (): number => {
-        return Math.floor((document.documentElement.clientWidth - 2) / 120);
+export const DateLineUtils = (function () {
+    const getColumnCount = (): number => {
+        const widthNavButton = 35;
+        const widthColumn = 120;
+        return Math.floor((document.documentElement.clientWidth - (widthNavButton * 4) - 2) / widthColumn);
     };
     return {
         /**
@@ -37,7 +39,7 @@ export const AppUtils = (function () {
                     cur = DateUtils.getCenturyFromDate(dt);
                     break;
             }
-            const mainLineLength = getClientWidth();
+            const mainLineLength = getColumnCount();
             return cur - mainLineLength + 1;
         },
         /**
@@ -48,7 +50,7 @@ export const AppUtils = (function () {
          * @returns массив NSEventPeriod.Event[]
          */
         InitMainLine: (init: number, Period: EnumPeriod) => {
-            const mainLineLength: number = getClientWidth();
+            const mainLineLength: number = getColumnCount();
             const rt: NSEventPeriod.Event[] = new Array(mainLineLength);
             for (let i = 0; i < mainLineLength; ++i) {
                 if (init + i !== 0) rt[i] = new NSEventPeriod.Event(init + i, Period);

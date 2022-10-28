@@ -1,8 +1,9 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { useContext } from 'react';
 import { AuthContext } from '../Contexts';
+import DateLine from '../DateLine/DateLine';
+import { publish } from '../lib/events';
 import LoginShow from '../LoginShow/LoginShow';
-import NavButton from '../NavButton/NavButton';
 
 const MyComponents = {
     Logon: (props: any) => {
@@ -14,7 +15,7 @@ const MyComponents = {
                     localStorage.removeItem('userTL');
                     setAuthContext({})
                 }}>Выход</button>
-                </>
+            </>
         } else {
             return <><button type="button" className="btn btn-link" data-bs-toggle="modal"
                 data-bs-target="#tmLoginModal">Вход</button>
@@ -30,9 +31,8 @@ const MyComponents = {
 
 function AppHeader(props: any) {
     const [authContext]: any = useContext(AuthContext);
-
     return (
-        <div>
+        <div id="appheader">
             <nav className="navbar navbar-expand-lg bg-light">
                 <div className="container-fluid">
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,28 +40,14 @@ function AppHeader(props: any) {
                     </button>
                     <div className="collapse navbar-collapse" id="navbarNavDropdown">
                         <ul className="navbar-nav align-items-center">
-                            <ul className="navbar-nav">
-                                <li className="nav-item me-1">
-                                    <NavButton onClick={props.onPrevPage}>&lt;&lt;</NavButton>
-                                </li>
-                                <li className="nav-item me-1">
-                                    <NavButton onClick={props.onPrevPeriod}>&lt;</NavButton>
-                                </li>
-                                <li className="nav-item me-1">
-                                    <NavButton onClick={props.onNextPeriod}>&gt;</NavButton>
-                                </li>
-                                <li className="nav-item">
-                                    <NavButton onClick={props.onNextPage}>&gt;&gt;</NavButton>
-                                </li>
-                            </ul>
                             <li className="nav-item dropdown">
                                 <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Линии времени
                                 </a>
                                 <ul className="dropdown-menu">
-                                    <li><a className="dropdown-item" href="#">Создать</a></li>
-                                    <li><a className="dropdown-item" href="#">Загрузить</a></li>
-                                    <li><a className="dropdown-item" href="#">Загрузить из файла</a></li>
+                                    <li><a type="button" className="dropdown-item" onClick={(e) => publish('createTL')}>Создать</a></li>
+                                    <li><a type="button" className="dropdown-item" onClick={(e) => publish('loadTL')}>Загрузить</a></li>
+                                    <li><a type="button" className="dropdown-item" onClick={(e) => publish('loadfromfileTL')}>Загрузить из файла</a></li>
                                 </ul>
                             </li>
                             <li className="nav-item ms-2">
@@ -74,7 +60,7 @@ function AppHeader(props: any) {
                     </div>
                 </div>
             </nav>
-            {props.children}
+            <DateLine />
         </div>
     )
 }

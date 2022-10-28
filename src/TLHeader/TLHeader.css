@@ -1,0 +1,11 @@
+.tl_head {
+    background: rgb(245,188,188);
+    background: linear-gradient(90deg, rgba(245,188,188,1) 0%, rgba(220,220,220,1) 54%, rgba(240,240,240,1) 100%);
+    padding: 2px;
+}
+
+.tl_head_sub {
+    background: rgb(119,228,74);
+    background: linear-gradient(90deg, rgba(119,228,74,1) 0%, rgba(220,220,220,1) 54%, rgba(240,240,240,1) 100%);
+    padding: 2px;
+}

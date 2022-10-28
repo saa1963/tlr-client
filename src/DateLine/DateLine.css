@@ -14,6 +14,11 @@ td {
     text-align: center;
 }
 
+td.saanavbutton {
+    padding: 0px;
+    width: 35px;
+}
+
 td:hover {
     font-weight: bold;
     cursor: pointer;
