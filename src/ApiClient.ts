@@ -1,5 +1,6 @@
 //import { TLPeriod } from './TLPeriod';
 import { stringUtils } from './lib/stringutils';
+import { TLPeriod } from './lib/TLPeriod';
 
 export class ApiClient {
   private static instance: ApiClient;
@@ -94,6 +95,7 @@ export class ApiClient {
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + localStorage.getItem('tokenTL'),
+        'Cache-Control': 'no-cache',
       },
     });
     if (response.headers.has('tl-server')) {
@@ -107,23 +109,22 @@ export class ApiClient {
     }
   }
 
-  //   public async GetTL(value: string): Promise<TLPeriod | string> {
-  //     const response = await fetch('load?' + new URLSearchParams({ tlname: value }), {
-  //       method: 'GET',
-  //       headers: {
-  //         Authorization: 'Bearer ' + localStorage.getItem('tokenTL'),
-  //       },
-  //     });
-  //     if (response.ok) {
-  //       const tline = await response.json();
-  //       const period = TLPeriod.CreateTLPeriod(tline);
-  //       period.Parent = null;
-  //       return period;
-  //     } else {
-  //       console.log(response.text());
-  //       return 'Ошибка загрузки данных';
-  //     }
-  //   }
+  public async GetTL(value: string): Promise<TLPeriod> {
+    const response = await fetch('load?' + new URLSearchParams({ tlname: value }), {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('tokenTL'),
+      },
+    });
+    if (response.ok) {
+      const tline = await response.json();
+      const period = TLPeriod.CreateTLPeriod(tline);
+      period.Parent = null;
+      return period;
+    } else {
+      throw new Error('Ошибка загрузки данных');
+    }
+  }
 
   public async DoRegister(
     login: string,

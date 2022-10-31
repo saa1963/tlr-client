@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import * as bootstrap from "bootstrap";
-import React, { ChangeEvent, forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import React, { ChangeEvent, forwardRef, useImperativeHandle, useState } from "react";
 import { ApiClient } from "../ApiClient";
 
 function LoadTLShow(props: any, ref: any): any {
-    const [selected, setSelected] = useState('');
+    const [selected, setSelected] = useState<string>('');
     const [errtext, setErrText] = useState('');
     const [list, setList] = useState<string[]>([]);
 
@@ -17,10 +17,18 @@ function LoadTLShow(props: any, ref: any): any {
                 setErrText('');
                 ApiClient.getInstance().GetUsersList()
                     .then((value: string[]) => {
-                        setList(value);
+                        if (value.length > 0) {
+                            setSelected(value[0]);
+                            setList(value);
+                        }
                     });
                 m?.show();
             },
+            closeModal: () => {
+                const myModalEl = document.getElementById('tmLoadModal');
+                const m = bootstrap.Modal.getOrCreateInstance(myModalEl!);
+                m.hide();
+            }
         }
     });
     return (
@@ -38,7 +46,7 @@ function LoadTLShow(props: any, ref: any): any {
                             <label htmlFor="listTL">Имя пользователя</label>
                             <select id="listTL" onChange={(e: ChangeEvent<HTMLSelectElement>) => setSelected(e.target.value)}>
                                 {list.map((name, idx) => {
-                                    return <option key={idx} selected={}>{name}</option>
+                                    return <option key={idx} value={name}>{name}</option>
                                 })}
                             </select>
                         </div>
@@ -49,8 +57,8 @@ function LoadTLShow(props: any, ref: any): any {
                     </div>
                     <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                        <button type="button" className="btn btn-primary"
-                            onClick={() => { props.onSumbit(selected); }}>OK</button>
+                        <button type="button" className="btn btn-primary" data-bs-dismiss="modal"
+                            onClick={() => { props.onSubmit(selected); }}>OK</button>
                     </div>
                 </div>
             </div>

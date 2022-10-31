@@ -9,3 +9,8 @@
     background: linear-gradient(90deg, rgba(119,228,74,1) 0%, rgba(220,220,220,1) 54%, rgba(240,240,240,1) 100%);
     padding: 2px;
 }
+
+#ddownTL {
+    padding: 0;
+    width: 70px;
+}

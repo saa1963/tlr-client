@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import DateUtils from '../lib/dateutils';
 import { EnumPeriod } from '../lib/EnumPeriod';
 import { subscribe, unsubscribe } from '../lib/events';
@@ -10,13 +10,27 @@ import { DateLineUtils } from './DateLineUtils';
 import ZoomIn from './icons8-zoom-in-50.png';
 import ZoomOut from './icons8-zoom-out-50.png';
 import LoadTLShow from '../LoadTLShow/LoadTLShow';
+import MessageBox from '../MessageBox/MessageBox';
+import { ApiClient } from '../ApiClient';
+import { observer } from 'mobx-react-lite';
+import TLBody from '../TLBody/TLBody';
+
+//create your forceUpdate hook
+function useForceUpdate(){
+    const [value, setValue] = useState(0); // integer state
+    return () => setValue(value => value + 1); // update state to force render
+    // An function that increment 👆🏻 the previous state like here 
+    // is better than directly setting `value + 1`
+}
 
 function DateLine() {
     const [period, setPeriod] = useState(EnumPeriod.decade);
     const [mainLine, setMainLine] = useState(DateLineUtils.InitMainLine(DateLineUtils.GetFirstInit(period), period));
     const [model, setModel] = useState([] as TLPeriod[]);
+    const forceUpdate = useForceUpdate();
 
     const refLoadTL = useRef(null as {openModal: () => void} | null);
+    const refMB = useRef(null as {openModal: (value:string) => void} | null);
 
     useEffect(() => {
         window.onresize = () => {
@@ -24,27 +38,31 @@ function DateLine() {
         }
       }, [period]);
 
-    
-
     useEffect(() => {
         subscribe('createTL', createTL);
-        subscribe('loadTL', loadTL);
+        subscribe('loadTL', loadTLHandler);
         subscribe('loadfromfileTL', loadfromfileTL);
         return () => {
             unsubscribe('loadfromfileTL', loadfromfileTL);
-            unsubscribe('loadTL', loadTL);
+            unsubscribe('loadTL', loadTLHandler);
             unsubscribe('createTL', createTL);
         }
     });  
 
-    const dates = DateLineUtils.GetDrawDates(period, mainLine);
+    const dates = useMemo(() => DateLineUtils.GetDrawDates(period, mainLine), [period, mainLine]);
 
     const createTL = () => {
         alert('createTL');
     }
 
-    const loadTL = () => {
+    const loadTLHandler = () => {
         refLoadTL?.current?.openModal();
+    }
+
+    const loadTL = async (name: string) => {
+        const tl = await ApiClient.getInstance().GetTL(name);
+        model.push(tl);
+        forceUpdate();
     }
 
     const loadfromfileTL = () => {
@@ -154,8 +172,6 @@ function DateLine() {
             <tr className="date">
                 <td className='saanavbutton'>
                     <NavButton onClick={OnPrevPage}>&lt;&lt;</NavButton>
-                </td>
-                <td className='saanavbutton'>
                     <NavButton onClick={OnPrevPeriod}>&lt;</NavButton>
                 </td>
                 {dates[0].map((a: string, idx: number) => {
@@ -175,18 +191,18 @@ function DateLine() {
                 })}
                 <td className='saanavbutton'>
                     <NavButton onClick={OnNextPeriod}>&gt;</NavButton>
-                </td>
-                <td className='saanavbutton'>
                     <NavButton onClick={OnNextPage}>&gt;&gt;</NavButton>
                 </td>
             </tr>
             {model.map((tl, idx) => {
-                //return <TLHeader idx={idx} name={tl.Name} isMain={tl.Parent === null} mainLineCount={mainLine.length} />
-                return <TLHeader tl={tl} mainLineCount={mainLine.length} />
+                return (
+                    <TLHeader tl={tl} mainLine={mainLine} period={period} idx={idx}></TLHeader>
+                );
             })}
             </tbody>
         </table>
-        <LoadTLShow ref={refLoadTL}></LoadTLShow>
+        <LoadTLShow ref={refLoadTL} onSubmit={loadTL}></LoadTLShow>
+        <MessageBox ref={refMB}></MessageBox>
         </div>
     );
 }
