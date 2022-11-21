@@ -1,5 +1,5 @@
 import DateUtils from './dateutils';
-import {makeAutoObservable} from 'mobx';
+import {computed, makeObservable, observable} from 'mobx';
 
 export enum EnumPeriod {
   day = 1, month = 2, year = 3, decade = 4, century = 5
@@ -14,7 +14,14 @@ export abstract class TLEvent {
   Century: number | null;
   Type?: EnumPeriod
   constructor(name: string) {
-    makeAutoObservable(this);
+    makeObservable(this, {
+      Name: observable,
+      Month: observable,
+      Year: observable,
+      Decade: observable,
+      Century: observable,
+      Type: observable,
+    });
     this.Name = name
     this.Day = null
     this.Month = null
@@ -94,7 +101,6 @@ export abstract class TLEvent {
 }
 
 export class TLEventDay extends TLEvent {
-
   public static CreateTLEventDay(name: string, day: number | null, month: number | null, year: number | null, 
         decade: number | null, century: number | null): TLEventDay {
     const rt = new TLEventDay(name)

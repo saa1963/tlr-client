@@ -1,12 +1,12 @@
 .tl_head {
-    background: rgb(245,188,188);
-    background: linear-gradient(90deg, rgba(245,188,188,1) 0%, rgba(220,220,220,1) 54%, rgba(240,240,240,1) 100%);
+    background: rgb(245, 188, 188);
+    background: linear-gradient(90deg, rgba(245, 188, 188, 1) 0%, rgba(220, 220, 220, 1) 54%, rgba(240, 240, 240, 1) 100%);
     padding: 2px;
 }
 
 .tl_head_sub {
-    background: rgb(119,228,74);
-    background: linear-gradient(90deg, rgba(119,228,74,1) 0%, rgba(220,220,220,1) 54%, rgba(240,240,240,1) 100%);
+    background: rgb(119, 228, 74);
+    background: linear-gradient(90deg, rgba(119, 228, 74, 1) 0%, rgba(220, 220, 220, 1) 54%, rgba(240, 240, 240, 1) 100%);
     padding: 2px;
 }
 
@@ -14,3 +14,44 @@
     padding: 0;
     width: 70px;
 }
+
+.hidden_cell {
+    background-color: rgba(0, 0, 0, 0.00)
+}
+
+.period_cell {
+    background-color: lightgray;
+    padding: 2px;
+    border-radius: 5px;
+    border-width: 1px;
+    border-style: solid;
+    font-size: smaller;
+}
+
+.period_cell:hover {
+    cursor: pointer;
+    background-color: darkgray;
+}
+
+
+.period_cell_drop {
+    border-color: red;
+}
+
+.note {
+    position: relative;
+}
+
+.note:after { /* Magic Happens Here!!! */
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    display: block;
+    border-left: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-top: 10px solid #f00;
+}
+

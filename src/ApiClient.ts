@@ -44,19 +44,19 @@ export class ApiClient {
     }
   }
 
-  //   public async SaveTL(model: TLPeriod): Promise<string> {
-  //     const response = await fetch('save', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: 'Bearer ' + localStorage.getItem('tokenTL'),
-  //       },
-  //       body: JSON.stringify({ s1: model.Name, s2: JSON.stringify(model) }),
-  //     });
-  //     console.log(response);
-  //     if (response.ok) return '';
-  //     else return 'Ошибка: ' + (await response.text());
-  //   }
+  public async SaveTL(model: TLPeriod): Promise<string> {
+    const response = await fetch('save', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + localStorage.getItem('tokenTL'),
+      },
+      body: JSON.stringify({ s1: model.Name, s2: JSON.stringify(model) }),
+    });
+    console.log(response);
+    if (response.ok) return '';
+    else return 'Ошибка: ' + (await response.text());
+  }
 
   public async TestToken(): Promise<string> {
     const response = await fetch('test', {

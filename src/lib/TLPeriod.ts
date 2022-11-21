@@ -9,6 +9,7 @@ import {
   TLEventDecade,
   TLEventCentury,
 } from './TLEvent';
+import { TLPeriodView } from './TLPeriodView';
 
 export class TLPeriod {
   Id: number = Math.floor(Math.random() * Math.floor(1000000000));
@@ -37,32 +38,136 @@ export class TLPeriod {
     );
   }
 
-  /**
+  ViewFromPeriod(): TLPeriodView {
+    const model: TLPeriodView = new TLPeriodView(this.Name, this.IsPeriod, this.Begin?.Type!, this.End?.Type!);
+    // model.Name = period.Name;
+    // model.IsPeriod = period.IsPeriod;
+    // model.BeginType = period.Begin.Type;
+    switch (
+    this.Begin?.Type // eslint-disable-line no-fallthrough
+    ) {
+      case EnumPeriod.day:
+        const ymd = DateUtils.YMDFromAD(this.Begin.Day!);
+        model.beginDayday = ymd!.day;
+        model.beginDaymonth = ymd!.month;
+        model.beginDayyear = ymd!.year;
+        break;
+      case EnumPeriod.month: // eslint-disable-line no-fallthrough
+        model.beginMonthmonth = DateUtils.getMonthFromMonth(this.Begin.Month!);
+        model.beginMonthyear = DateUtils.getYearFromMonth(this.Begin.Month!);
+        break;
+      case EnumPeriod.year: // eslint-disable-line no-fallthrough
+        model.beginYear = this.Begin.Year;
+        break;
+      case EnumPeriod.decade: // eslint-disable-line no-fallthrough
+        model.beginDecadedecade = DateUtils.getDecadeFromDecade(this.Begin.Decade!);
+        model.beginDecadecentury = DateUtils.getCenturyFromDecade(this.Begin.Decade!);
+        break;
+      case EnumPeriod.century: // eslint-disable-line no-fallthrough
+        model.beginCentury = this.Begin.Century;
+        break;
+    }
+    model.endType = this.End?.Type!;
+    switch (this.End?.Type!) {
+      case EnumPeriod.day:
+        const ymd = DateUtils.YMDFromAD(this.End?.Day!);
+        model.endDayday = ymd!.day;
+        model.endDaymonth = ymd!.month;
+        model.endDayyear = ymd!.year;
+        break;
+      case EnumPeriod.month: // eslint-disable-line no-fallthrough
+        model.endMonthmonth = DateUtils.getMonthFromMonth(this.End?.Month!);
+        model.endMonthyear = DateUtils.getYearFromMonth(this.End?.Month!);
+        break;
+      case EnumPeriod.year: // eslint-disable-line no-fallthrough
+        model.endYear = this.End?.Year!;
+        break;
+      case EnumPeriod.decade: // eslint-disable-line no-fallthrough
+        model.endDecadedecade = DateUtils.getDecadeFromDecade(this.End?.Decade!);
+        model.endDecadecentury = DateUtils.getCenturyFromDecade(this.End?.Decade!);
+        break;
+      case EnumPeriod.century: // eslint-disable-line no-fallthrough
+        model.endCentury = this.End?.Century!;
+        break;
+    }
+    return model;
+  }
+
+  static CreateTLPeriodWithView(inview: TLPeriodView) {
+    const {name,
+    isperiod,
+    beginType,
+    beginDayday,
+    beginDaymonth,
+    beginDayyear,
+    beginMonthmonth,
+    beginMonthyear,
+    beginYear,
+    beginDecadedecade,
+    beginDecadecentury,
+    beginCentury,
+    endType,
+    endDayday,
+    endDaymonth,
+    endDayyear,
+    endMonthmonth,
+    endMonthyear,
+    endYear,
+    endDecadedecade,
+    endDecadecentury,
+    endCentury} = inview;
+    return TLPeriod.CreateTLPeriodWithArgs(
+      name,
+    isperiod,
+    beginType,
+    beginDayday,
+    beginDaymonth,
+    beginDayyear,
+    beginMonthmonth,
+    beginMonthyear,
+    beginYear,
+    beginDecadedecade,
+    beginDecadecentury,
+    beginCentury,
+    endType,
+    endDayday,
+    endDaymonth,
+    endDayyear,
+    endMonthmonth,
+    endMonthyear,
+    endYear,
+    endDecadedecade,
+    endDecadecentury,
+    endCentury
+    )
+  }
+
+    /**
    * создает TLPeriod из параметров
    */
   static CreateTLPeriodWithArgs(
     name: string,
     isperiod: boolean,
     beginType: EnumPeriod,
-    beginDayday: number,
-    beginDaymonth: number,
-    beginDayyear: number,
-    beginMonthmonth: number,
-    beginMonthyear: number,
-    beginYear: number,
-    beginDecadedecade: number,
-    beginDecadecentury: number,
-    beginCentury: number,
+    beginDayday: Nullable<number>,
+    beginDaymonth: Nullable<number>,
+    beginDayyear: Nullable<number>,
+    beginMonthmonth: Nullable<number>,
+    beginMonthyear: Nullable<number>,
+    beginYear: Nullable<number>,
+    beginDecadedecade: Nullable<number>,
+    beginDecadecentury: Nullable<number>,
+    beginCentury: Nullable<number>,
     endType: EnumPeriod,
-    endDayday: number,
-    endDaymonth: number,
-    endDayyear: number,
-    endMonthmonth: number,
-    endMonthyear: number,
-    endYear: number,
-    endDecadedecade: number,
-    endDecadecentury: number,
-    endCentury: number,
+    endDayday: Nullable<number>,
+    endDaymonth: Nullable<number>,
+    endDayyear: Nullable<number>,
+    endMonthmonth: Nullable<number>,
+    endMonthyear: Nullable<number>,
+    endYear: Nullable<number>,
+    endDecadedecade: Nullable<number>,
+    endDecadecentury: Nullable<number>,
+    endCentury: Nullable<number>,
   ): TLPeriod {
     const rt = new TLPeriod();
     rt.Name = name;
@@ -71,31 +176,31 @@ export class TLPeriod {
     if (type === EnumPeriod.day) {
       rt.Begin = TLEventDay.CreateTLEventDay(
         'Начало',
-        DateUtils.DaysFromAD(beginDayyear, beginDaymonth, beginDayday),
-        DateUtils.getMonthFromYMD({ year: beginDayyear, month: beginDaymonth, day: beginDayday }),
+        DateUtils.DaysFromAD(beginDayyear!, beginDaymonth!, beginDayday!),
+        DateUtils.getMonthFromYMD({ year: beginDayyear!, month: beginDaymonth!, day: beginDayday! }),
         beginDayyear,
-        DateUtils.getDecadeFromYMD({ year: beginDayyear, month: beginDaymonth, day: beginDayday }),
-        DateUtils.getCenturyFromYMD({ year: beginDayyear, month: beginDaymonth, day: beginDayday }),
+        DateUtils.getDecadeFromYMD({ year: beginDayyear!, month: beginDaymonth!, day: beginDayday! }),
+        DateUtils.getCenturyFromYMD({ year: beginDayyear!, month: beginDaymonth!, day: beginDayday! }),
       );
     } else if (type === EnumPeriod.month) {
       rt.Begin = TLEventMonth.CreateTLEventMonth(
         'Начало',
-        DateUtils.getMonthFromYMD({ year: beginMonthyear, month: beginMonthmonth, day: 1 }),
+        DateUtils.getMonthFromYMD({ year: beginMonthyear!, month: beginMonthmonth!, day: 1 }),
         beginMonthyear,
-        DateUtils.getDecadeFromYMD({ year: beginMonthyear, month: beginMonthmonth, day: 1 }),
-        DateUtils.getCenturyFromYMD({ year: beginMonthyear, month: beginMonthmonth, day: 1 }),
+        DateUtils.getDecadeFromYMD({ year: beginMonthyear!, month: beginMonthmonth!, day: 1 }),
+        DateUtils.getCenturyFromYMD({ year: beginMonthyear!, month: beginMonthmonth!, day: 1 }),
       );
     } else if (type === EnumPeriod.year) {
       rt.Begin = TLEventYear.CreateTLEventYear(
         'Начало',
         beginYear,
-        DateUtils.getDecadeFromYMD({ year: beginYear, month: 1, day: 1 }),
-        DateUtils.getCenturyFromYMD({ year: beginYear, month: 1, day: 1 }),
+        DateUtils.getDecadeFromYMD({ year: beginYear!, month: 1, day: 1 }),
+        DateUtils.getCenturyFromYMD({ year: beginYear!, month: 1, day: 1 }),
       );
     } else if (type === EnumPeriod.decade) {
       rt.Begin = TLEventDecade.CreateTLEventDecade(
         'Начало',
-        DateUtils.getDecade(beginDecadecentury, beginDecadedecade),
+        DateUtils.getDecade(beginDecadecentury!, beginDecadedecade!),
         beginDecadecentury,
       );
     } else if (type === EnumPeriod.century) {
@@ -106,31 +211,31 @@ export class TLPeriod {
       if (type === EnumPeriod.day) {
         rt.End = TLEventDay.CreateTLEventDay(
           'Конец',
-          DateUtils.DaysFromAD(endDayyear, endDaymonth, endDayday),
-          DateUtils.getMonthFromYMD({ year: endDayyear, month: endDaymonth, day: endDayday }),
+          DateUtils.DaysFromAD(endDayyear!, endDaymonth!, endDayday!),
+          DateUtils.getMonthFromYMD({ year: endDayyear!, month: endDaymonth!, day: endDayday! }),
           endDayyear,
-          DateUtils.getDecadeFromYMD({ year: endDayyear, month: endDaymonth, day: endDayday }),
-          DateUtils.getCenturyFromYMD({ year: endDayyear, month: endDaymonth, day: endDayday }),
+          DateUtils.getDecadeFromYMD({ year: endDayyear!, month: endDaymonth!, day: endDayday! }),
+          DateUtils.getCenturyFromYMD({ year: endDayyear!, month: endDaymonth!, day: endDayday! }),
         );
       } else if (type === EnumPeriod.month) {
         rt.End = TLEventMonth.CreateTLEventMonth(
           'Конец',
-          DateUtils.getMonthFromYMD({ year: endMonthyear, month: endMonthmonth, day: 1 }),
+          DateUtils.getMonthFromYMD({ year: endMonthyear!, month: endMonthmonth!, day: 1 }),
           endMonthyear,
-          DateUtils.getDecadeFromYMD({ year: endMonthyear, month: endMonthmonth, day: 1 }),
-          DateUtils.getCenturyFromYMD({ year: endMonthyear, month: endMonthmonth, day: 1 }),
+          DateUtils.getDecadeFromYMD({ year: endMonthyear!, month: endMonthmonth!, day: 1 }),
+          DateUtils.getCenturyFromYMD({ year: endMonthyear!, month: endMonthmonth!, day: 1 }),
         );
       } else if (type === EnumPeriod.year) {
         rt.End = TLEventYear.CreateTLEventYear(
           'Конец',
           endYear,
-          DateUtils.getDecadeFromYMD({ year: endYear, month: 1, day: 1 }),
-          DateUtils.getCenturyFromYMD({ year: endYear, month: 1, day: 1 }),
+          DateUtils.getDecadeFromYMD({ year: endYear!, month: 1, day: 1 }),
+          DateUtils.getCenturyFromYMD({ year: endYear!, month: 1, day: 1 }),
         );
       } else if (type === EnumPeriod.decade) {
         rt.End = TLEventDecade.CreateTLEventDecade(
           'Конец',
-          DateUtils.getDecade(endDecadecentury, endDecadedecade),
+          DateUtils.getDecade(endDecadecentury!, endDecadedecade!),
           endDecadecentury,
         );
       } else if (type === EnumPeriod.century) {
@@ -221,6 +326,17 @@ export class TLPeriod {
         rt.Periods.push(period);
       });
     }
+    return rt;
+  }
+
+  public static CreateTL20Century() {
+    const rt = new TLPeriod();
+    rt.Name = '';
+    rt.Begin = TLEventCentury.CreateTLEventCentury('', 20);
+    rt.End = Object.assign({}, rt.Begin);
+    rt.Parent = null;
+    rt.mBeginDay = rt.GetBeginDate();
+    rt.mEndDay = rt.GetEndDate();
     return rt;
   }
 
@@ -557,5 +673,18 @@ export class TLPeriod {
     if (this.Periods.length === 0) return false;
     if (i < 0 || i >= this.Periods.length) return false;
     return true;
+  }
+
+  find(id: number): [TLPeriod | undefined, number | undefined] {
+    let idx0: number | undefined;
+    const period = this.Items.find((value, index) => {
+      if (value.Id === id) {
+        idx0 = index;
+        return true;
+      } else {
+        return false;
+      }
+    });
+    return [period, idx0];
   }
 }

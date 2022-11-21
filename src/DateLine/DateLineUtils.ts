@@ -5,7 +5,7 @@ import * as NSEventPeriod from '../lib/EventPeriod';
 export const DateLineUtils = (function () {
     const getColumnCount = (): number => {
         const widthNavButton = 35;
-        const widthColumn = 120;
+        const widthColumn = 125;
         return Math.floor((document.documentElement.clientWidth - (widthNavButton * 4) - 2) / widthColumn);
     };
     return {

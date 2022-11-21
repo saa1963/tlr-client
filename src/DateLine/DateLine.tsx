@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import DateUtils from '../lib/dateutils';
 import { EnumPeriod } from '../lib/EnumPeriod';
 import { subscribe, unsubscribe } from '../lib/events';
@@ -12,31 +12,29 @@ import ZoomOut from './icons8-zoom-out-50.png';
 import LoadTLShow from '../LoadTLShow/LoadTLShow';
 import MessageBox from '../MessageBox/MessageBox';
 import { ApiClient } from '../ApiClient';
-import { observer } from 'mobx-react-lite';
-import TLBody from '../TLBody/TLBody';
-
-//create your forceUpdate hook
-function useForceUpdate(){
-    const [value, setValue] = useState(0); // integer state
-    return () => setValue(value => value + 1); // update state to force render
-    // An function that increment 👆🏻 the previous state like here 
-    // is better than directly setting `value + 1`
-}
+import useForceUpdate from '../lib/ForceUpdate';
+import AddPeriod from '../AddPeriod/AddPeriod';
 
 function DateLine() {
     const [period, setPeriod] = useState(EnumPeriod.decade);
     const [mainLine, setMainLine] = useState(DateLineUtils.InitMainLine(DateLineUtils.GetFirstInit(period), period));
     const [model, setModel] = useState([] as TLPeriod[]);
+    // Show or hide the custom context menu
+    const [isShown, setIsShown] = useState(false);
+    // The position of the custom context menu
+    const [position, setPosition] = 
+        useState({ x: 0, y: 0, idx: 0, id: 0, idx0: undefined as number | undefined, item: undefined as TLPeriod | undefined });
     const forceUpdate = useForceUpdate();
 
-    const refLoadTL = useRef(null as {openModal: () => void} | null);
-    const refMB = useRef(null as {openModal: (value:string) => void} | null);
+    const refLoadTL = useRef(null as { openModal: () => void } | null);
+    const refMB = useRef(null as { openModal: (value: string) => void } | null);
+    const refAddPeriod = useRef(null as { openModal: () => void } | null);
 
     useEffect(() => {
         window.onresize = () => {
-          setMainLine(DateLineUtils.InitMainLine(DateLineUtils.GetFirstInit(period), period));
+            setMainLine(DateLineUtils.InitMainLine(DateLineUtils.GetFirstInit(period), period));
         }
-      }, [period]);
+    }, [period]);
 
     useEffect(() => {
         subscribe('createTL', createTL);
@@ -47,49 +45,142 @@ function DateLine() {
             unsubscribe('loadTL', loadTLHandler);
             unsubscribe('createTL', createTL);
         }
-    });  
+    });
 
     const dates = useMemo(() => DateLineUtils.GetDrawDates(period, mainLine), [period, mainLine]);
 
-    const createTL = () => {
+    // Show the custom context menu
+    function showContextMenu(event: React.MouseEvent<HTMLTableCellElement>, idx: number, id: number) {
+        // Disable the default context menu
+        event.preventDefault();
+
+        setIsShown(false);
+        const [tl, idx0] = model[idx].find(id);
+        const newPosition = {
+            x: event.pageX,
+            y: event.pageY,
+            idx: idx,
+            id: id,
+            idx0: idx0,
+            item: tl,
+        };
+
+        setPosition(newPosition);
+        setIsShown(true);
+    }
+
+    // Hide the custom context menu
+    function hideContextMenu() {
+        setIsShown(false);
+    }
+
+    // Do what you want when an option in the context menu is selected
+    //const [selectedValue, setSelectedValue] = useState<string>();
+    function contextMenuHandler(selectedValue: string, ev: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+        switch (selectedValue) {
+            case 'expand':
+                if (position.item?.Items && position.item?.Items.length > 0) {
+                    position.item!.Parent = model[position.idx];
+                    AddTLHandler(position.item);
+                }
+                break;
+            case 'edit':
+                //await position.item?.EditPeriod(idx, idx0, period0);
+                refAddPeriod.current?.openModal();
+                break;
+            case 'delete':
+                model[position.idx].Remove(position.idx0!);
+                ForceRenderDateLine();
+                break;
+        }
+        setIsShown(false);
+    }
+
+    function AddTL(idx: number) {
+        setPosition({ x: 0, y: 0, idx: idx, id: 0, 
+            idx0: undefined as number | undefined, item: undefined as TLPeriod | undefined });
+            refAddPeriod.current?.openModal();            
+    }
+
+    function OnSubmitAddPeriod(tl: TLPeriod) {
+        if (position.idx >= 0) {
+            if (position.idx0) {
+                tl.Parent = model[position.idx];
+                model[position.idx].Items[position.idx0] = tl;
+            } else {
+                model[position.idx].Add(tl);
+            }
+            forceUpdate();
+        }
+    }
+
+    function createTL() {
         alert('createTL');
     }
 
-    const loadTLHandler = () => {
+    function loadTLHandler() {
         refLoadTL?.current?.openModal();
     }
 
-    const loadTL = async (name: string) => {
+    async function loadTL(name: string) {
         const tl = await ApiClient.getInstance().GetTL(name);
-        model.push(tl);
-        forceUpdate();
+        AddTLHandler(tl);
     }
 
-    const loadfromfileTL = () => {
+    function loadfromfileTL() {
         alert('loadfromfileTL');
     }
 
-    const OnPrevPage = () => {
+    function AddTLHandler(tl?: TLPeriod) {
+        model.push(tl!);
+        forceUpdate();
+    }
+
+    function RemoveTLHandler(idx: number) {
+        model.splice(idx);
+        forceUpdate();
+    }
+
+    function ForceRenderDateLine() {
+        forceUpdate();
+    }
+
+    function ShowAll(idx: number) {
+        const source = model[idx];
+        const target = TLPeriod.CreateTLPeriod(source);
+        target.IsShowAll = true;
+        AddTLHandler(target);
+    }
+
+    function OnPrevPage() {
         const i = mainLine[0].ValueEvent - mainLine.length;
-        if (i !== 0) setMainLine(DateLineUtils.InitMainLine(i, period));
-        else setMainLine(DateLineUtils.InitMainLine(-1, period));
-    };
-    const OnPrevPeriod = () => {
+        if (i !== 0)
+            setMainLine(DateLineUtils.InitMainLine(i, period));
+        else
+            setMainLine(DateLineUtils.InitMainLine(-1, period));
+    }
+    function OnPrevPeriod() {
         const i = mainLine[0].ValueEvent - 1;
-        if (i !== 0) setMainLine(DateLineUtils.InitMainLine(i, period));
-        else setMainLine(DateLineUtils.InitMainLine(-1, period));
-    };
-    const OnNextPeriod = () => {
+        if (i !== 0)
+            setMainLine(DateLineUtils.InitMainLine(i, period));
+        else
+            setMainLine(DateLineUtils.InitMainLine(-1, period));
+    }
+    function OnNextPeriod() {
         const i = mainLine[0].ValueEvent + 1;
-        if (i !== 0) setMainLine(DateLineUtils.InitMainLine(i, period));
-        else setMainLine(DateLineUtils.InitMainLine(1, period));
-    };
-    const OnNextPage = () => {
+        if (i !== 0)
+            setMainLine(DateLineUtils.InitMainLine(i, period));
+        else
+            setMainLine(DateLineUtils.InitMainLine(1, period));
+    }
+    function OnNextPage() {
         const i = mainLine[0].ValueEvent + mainLine.length;
-        if (i !== 0) setMainLine(DateLineUtils.InitMainLine(i, period));
-        else setMainLine(DateLineUtils.InitMainLine(1, period));
-    };
-    const OnScaleBack = (idx: number) => {
+        if (i !== 0)
+            setMainLine(DateLineUtils.InitMainLine(i, period));
+        else
+            setMainLine(DateLineUtils.InitMainLine(1, period));
+    }
+    function OnScaleBack(idx: number) {
         const value = mainLine[idx].ValueEvent;
         let init: number;
         switch (period) {
@@ -117,7 +208,7 @@ function DateLine() {
         setMainLine(DateLineUtils.InitMainLine(init, period));
     }
 
-    const OnScaleForward = (idx: number) => {
+    function OnScaleForward(idx: number) {
         const value = mainLine[idx].ValueEvent;
         let init: number;
         switch (period) {
@@ -147,7 +238,7 @@ function DateLine() {
 
 
 
-    const OnShowSlice = (ev: number): void => {
+    function OnShowSlice(ev: number): void {
         // const ar: TLPeriod[] = this.model.GetSlice(ev, this.Period);
         // const s = document.createElement('ul') as HTMLUListElement;
         // for (const o of ar) {
@@ -167,42 +258,64 @@ function DateLine() {
     }
     return (
         <div>
-        <table id="MainTable">
-            <tbody>
-            <tr className="date">
-                <td className='saanavbutton'>
-                    <NavButton onClick={OnPrevPage}>&lt;&lt;</NavButton>
-                    <NavButton onClick={OnPrevPeriod}>&lt;</NavButton>
-                </td>
-                {dates[0].map((a: string, idx: number) => {
-                    return (
-                        <td key={idx} className="date_cell" id={idx.toString()} onDoubleClick={(e) => { OnShowSlice(dates[1][idx]) }}>
-                            <div className='d-flex justify-content-between'>
-                                <button className='btn border-0 m-0 p-0' onClick={() => { OnScaleBack(idx) }}>
-                                    <img src={ZoomOut} alt="ZoomOut" width="20" height="20" />
-                                </button>
-                                {a}
-                                <button className='btn border-0 m-0 p-0' onClick={() => { OnScaleForward(idx) }}>
-                                    <img src={ZoomIn} alt="ZoomIn" width="20" height="20" />
-                                </button>
-                            </div>
+            <table id="MainTable" onMouseDown={hideContextMenu}>
+                <tbody>
+                    <tr className="date">
+                        <td className='saanavbutton'>
+                            <NavButton onClick={OnPrevPage}>&lt;&lt;</NavButton>
+                            <NavButton onClick={OnPrevPeriod}>&lt;</NavButton>
                         </td>
-                    );
-                })}
-                <td className='saanavbutton'>
-                    <NavButton onClick={OnNextPeriod}>&gt;</NavButton>
-                    <NavButton onClick={OnNextPage}>&gt;&gt;</NavButton>
-                </td>
-            </tr>
-            {model.map((tl, idx) => {
-                return (
-                    <TLHeader tl={tl} mainLine={mainLine} period={period} idx={idx}></TLHeader>
-                );
-            })}
-            </tbody>
-        </table>
-        <LoadTLShow ref={refLoadTL} onSubmit={loadTL}></LoadTLShow>
-        <MessageBox ref={refMB}></MessageBox>
+                        {dates[0].map((a: string, idx: number) => {
+                            return (
+                                <td key={idx} className="date_cell" id={idx.toString()} onDoubleClick={(e) => { OnShowSlice(dates[1][idx]) }}>
+                                    <div className='d-flex justify-content-between'>
+                                        <button className='btn border-0 m-0 p-0' onClick={() => { OnScaleBack(idx) }}>
+                                            <img src={ZoomOut} alt="ZoomOut" width="20" height="20" />
+                                        </button>
+                                        {a}
+                                        <button className='btn border-0 m-0 p-0' onClick={() => { OnScaleForward(idx) }}>
+                                            <img src={ZoomIn} alt="ZoomIn" width="20" height="20" />
+                                        </button>
+                                    </div>
+                                </td>
+                            );
+                        })}
+                        <td className='saanavbutton'>
+                            <NavButton onClick={OnNextPeriod}>&gt;</NavButton>
+                            <NavButton onClick={OnNextPage}>&gt;&gt;</NavButton>
+                        </td>
+                    </tr>
+                    {model.map((tl, idx) => {
+                        return (
+                            <TLHeader key={idx} tl={tl} mainLine={mainLine} period={period} idx={idx}
+                                addTL={AddTL}
+                                removeTLHandler={RemoveTLHandler} forceRenderDateLine={ForceRenderDateLine}
+                                contextMenuHandler={showContextMenu}
+                                showMsgBox={(s: string) => refMB.current?.openModal(s)}
+                                showAll={ShowAll}></TLHeader>
+                        );
+                    })}
+                </tbody>
+            </table>
+            <LoadTLShow ref={refLoadTL} onSubmit={loadTL}></LoadTLShow>
+            <MessageBox ref={refMB}></MessageBox>
+            {isShown && (
+                <div
+                    style={{ top: position.y, left: position.x }}
+                    className="custom-context-menu">
+                    <div className="option" onClick={(ev) => contextMenuHandler("expand", ev)}>
+                        Развернуть
+                    </div>
+                    <div className="option" onClick={(ev) => contextMenuHandler("edit", ev)}>
+                        Изменить
+                    </div>
+                    <div className="option" onClick={(ev) => contextMenuHandler("delete", ev)}>
+                        Удалить
+                    </div>
+                </div>
+            )}
+            <AddPeriod ref={refAddPeriod} inperiod={position.item ?? TLPeriod.CreateTL20Century()}
+                OnSubmit={(tl: TLPeriod) => OnSubmitAddPeriod(tl)}></AddPeriod>
         </div>
     );
 }

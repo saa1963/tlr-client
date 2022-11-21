@@ -5,21 +5,49 @@
 
 .date {
     background-color: bisque;
-}    
+}   
 
-td {
-    padding: 2px;
-    white-space: nowrap;
-    width: 120px;
-    text-align: center;
+.date td {
+        padding: 2px;
+        white-space: nowrap;
+        width: 120px;
+        text-align: center;
+}        
+
+.date td:hover {
+    font-weight: bold;
+    cursor: pointer;
 }
 
 td.saanavbutton {
+    white-space: nowrap;
     padding: 0px;
     width: 70px;
 }
 
-td:hover {
-    font-weight: bold;
+/* .container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+  } */
+  
+  .custom-context-menu {
+    position: absolute;
+    z-index: 10;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .option {
     cursor: pointer;
-}
+    padding: 5px 30px;
+  }
+  
+  .option:hover {
+    background: rgb(185,171,185);
+  }
+
