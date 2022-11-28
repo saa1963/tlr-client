@@ -14,6 +14,7 @@ import MessageBox from '../MessageBox/MessageBox';
 import { ApiClient } from '../ApiClient';
 import useForceUpdate from '../lib/ForceUpdate';
 import AddPeriod from '../AddPeriod/AddPeriod';
+import UploadFile from '../UploadFile/UploadFile';
 
 function DateLine() {
     const [period, setPeriod] = useState(EnumPeriod.decade);
@@ -22,13 +23,14 @@ function DateLine() {
     // Show or hide the custom context menu
     const [isShown, setIsShown] = useState(false);
     // The position of the custom context menu
-    const [position, setPosition] = 
+    const [position, setPosition] =
         useState({ x: 0, y: 0, idx: 0, id: 0, idx0: undefined as number | undefined, item: undefined as TLPeriod | undefined });
     const forceUpdate = useForceUpdate();
 
     const refLoadTL = useRef(null as { openModal: () => void } | null);
-    const refMB = useRef(null as { openModal: (value: string) => void } | null);
+    const refMB = useRef(null as { openModal: (value: string) => void, openModalHtml: (value: Node) => void } | null);
     const refAddPeriod = useRef(null as { openModal: () => void } | null);
+    const refUploadFile = useRef(null as { openModal: () => void } | null);
 
     useEffect(() => {
         window.onresize = () => {
@@ -97,9 +99,11 @@ function DateLine() {
     }
 
     function AddTL(idx: number) {
-        setPosition({ x: 0, y: 0, idx: idx, id: 0, 
-            idx0: undefined as number | undefined, item: undefined as TLPeriod | undefined });
-            refAddPeriod.current?.openModal();            
+        setPosition({
+            x: 0, y: 0, idx: idx, id: 0,
+            idx0: undefined as number | undefined, item: undefined as TLPeriod | undefined
+        });
+        refAddPeriod.current?.openModal();
     }
 
     function OnSubmitAddPeriod(tl: TLPeriod) {
@@ -128,7 +132,22 @@ function DateLine() {
     }
 
     function loadfromfileTL() {
-        alert('loadfromfileTL');
+        refUploadFile.current?.openModal()
+    }
+
+    function UploadFileTL(file: Nullable<File>) {
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const fileContent = reader.result as string;
+                const tline = JSON.parse(fileContent);
+                const tl = TLPeriod.CreateTLPeriod(tline);
+                tl.Parent = null;
+                model.push(tl);
+                forceUpdate();
+            };
+            reader.readAsText(file);
+        }
     }
 
     function AddTLHandler(tl?: TLPeriod) {
@@ -239,23 +258,23 @@ function DateLine() {
 
 
     function OnShowSlice(ev: number): void {
-        // const ar: TLPeriod[] = this.model.GetSlice(ev, this.Period);
-        // const s = document.createElement('ul') as HTMLUListElement;
-        // for (const o of ar) {
-        //   const li = document.createElement('li');
-        //   let txtPeriod: string;
-        //   if (o.IsPeriod) {
-        //     txtPeriod = '(' + o.Begin.Format() + ' - ' + o.End.Format() + ')';
-        //   } else {
-        //     txtPeriod = '(' + o.Begin.Format() + ')';
-        //   }
-        //   li.textContent = txtPeriod + ' ' + o.Name;
-        //   s.append(li);
-        // }
-        // if (s.childNodes.length === 0) s.append('Нет событий.');
-        // new BoxViewHtml(s).Show();
-        alert('No implementation');
+        const ar: TLPeriod[] = DateLineUtils.GetSlice(model, ev, period);
+        const s = document.createElement('ul') as HTMLUListElement;
+        for (const o of ar) {
+          const li = document.createElement('li');
+          let txtPeriod: string;
+          if (o.IsPeriod) {
+            txtPeriod = '(' + o.Begin!.Format() + ' - ' + o.End!.Format() + ')';
+          } else {
+            txtPeriod = '(' + o.Begin!.Format() + ')';
+          }
+          li.textContent = txtPeriod + ' ' + o.Name;
+          s.append(li);
+        }
+        if (s.childNodes.length === 0) s.append('Нет событий.');
+        refMB?.current?.openModalHtml(s)
     }
+    
     return (
         <div>
             <table id="MainTable" onMouseDown={hideContextMenu}>
@@ -316,6 +335,7 @@ function DateLine() {
             )}
             <AddPeriod ref={refAddPeriod} inperiod={position.item ?? TLPeriod.CreateTL20Century()}
                 OnSubmit={(tl: TLPeriod) => OnSubmitAddPeriod(tl)}></AddPeriod>
+            <UploadFile ref={refUploadFile} OnSubmit={UploadFileTL}></UploadFile>
         </div>
     );
 }

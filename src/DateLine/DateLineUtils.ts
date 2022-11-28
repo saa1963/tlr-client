@@ -1,6 +1,7 @@
 import DateUtils from "../lib/dateutils";
 import { EnumPeriod } from "../lib/EnumPeriod";
 import * as NSEventPeriod from '../lib/EventPeriod';
+import { TLPeriod } from "../lib/TLPeriod";
 
 export const DateLineUtils = (function () {
     const getColumnCount = (): number => {
@@ -85,6 +86,20 @@ export const DateLineUtils = (function () {
                 }
             }
             return [dates, datesNum];
+        },
+        GetSlice: (models: TLPeriod[], n: number, period: EnumPeriod): TLPeriod[] => {
+            const items: TLPeriod[] = [];
+            for (const q of models) {
+                q.getAllSuitablePeriodsFromHierarchy(n, n, period, items);
+            }
+            const items1: TLPeriod[] = [];
+            for (const it of items) {
+                if (!items1.includes(it)) {
+                    items1.push(it);
+                }
+            }
+            items1.sort((a, b) => (a.mBeginDay ?? 0) - (b.mBeginDay ?? 0));
+            return items1;
         }
     }
 })();

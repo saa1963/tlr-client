@@ -2,9 +2,8 @@ import { TLPeriod } from '../lib/TLPeriod';
 import './TLHeader.css';
 import * as NSEventPeriod from '../lib/EventPeriod';
 import { InterfaceExTLPeriod, TLHeaderUtils } from './TLHeaderUtils';
-import React, { useState } from 'react';
+import React from 'react';
 import { EnumPeriod } from '../lib/EnumPeriod';
-import useForceUpdate from '../lib/ForceUpdate';
 import { ApiClient } from '../ApiClient';
 
 const TLHeader = (
@@ -19,7 +18,6 @@ const TLHeader = (
       showMsgBox: (msg: string) => void,
       showAll: (idx: number) => void
     }) => {
-  const forceUpdate = useForceUpdate();
 
   const OnDragEnter = (ev: React.DragEvent<HTMLTableCellElement>) => {
     ev.preventDefault();

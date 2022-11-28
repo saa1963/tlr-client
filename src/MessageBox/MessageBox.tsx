@@ -9,9 +9,18 @@ function MessageBox(props: any, ref: any): any {
                 const myModalEl = document.getElementById('tmMessageBoxModal');
                 const m = bootstrap.Modal.getOrCreateInstance(myModalEl!);
                 const body = document.getElementById('modalbody');
+                body!.innerHTML = '';
                 body!.textContent = text;
                 m?.show();
             },
+            openModalHtml: (text: Node) => {
+                const myModalEl = document.getElementById('tmMessageBoxModal');
+                const m = bootstrap.Modal.getOrCreateInstance(myModalEl!);
+                const body = document.getElementById('modalbody');
+                body!.innerHTML = '';
+                body!.appendChild(text);
+                m?.show();
+            }
         }
     });
     return (
@@ -24,7 +33,7 @@ function MessageBox(props: any, ref: any): any {
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div id="modalbody" className="modal-body">
+                    <div id="modalbody" className="modal-body" style={{overflow: 'auto'}}>
                         111
                     </div>
                     <div className="modal-footer">
