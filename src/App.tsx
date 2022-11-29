@@ -18,7 +18,6 @@ function App() {
       }  
     })
   }, []);
-  console.log('App');
   return (
     <AuthContext.Provider value={[authInfo, setAuthInfo]}>
       <AppHeader />
